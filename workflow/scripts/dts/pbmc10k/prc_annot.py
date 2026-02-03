@@ -1,10 +1,8 @@
 import os
 import snapatac2 as snap
-from snapatac2.datasets import _datasets, datasets
 from pathlib import Path
 import pandas as pd
 import argparse
-
 
 # Init args
 parser = argparse.ArgumentParser()
@@ -14,10 +12,9 @@ args = vars(parser.parse_args())
 path_annot = args['path_annot']
 
 # Change default cache dir
-_datasets = datasets()
-_datasets.path = Path('/tmp/')
+os.environ['SNAP_DATA_DIR'] = '/tmp/'
 
-# Download
+# Download (fetches the PBMC10k RNA data and loads it into memory (cache) for further processing)
 rna = snap.read(snap.datasets.pbmc10k_multiome(modality='RNA', type='h5ad'), backed=None)
 
 # Extract annot
