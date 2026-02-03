@@ -1,5 +1,13 @@
 max_mins_per_step: 560
 
+# INFOS
+#
+# hg38 : human genome build 38
+# matrix : gene expression
+# n_hvg (n_hvr) : number of highly variable genes (regions)
+# test : subset of cells for testing
+#
+
 # Methods
 methods:
     celloracle:
