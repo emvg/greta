@@ -1,0 +1,23 @@
+#!/bin/bash
+# interactive run in a detached tmux session with scrollable output
+
+TARGET=$1
+CONDA_ENV="greta"
+SESSION_NAME="gretai"
+WORKDIR="/globalscratch/vangysel/greta"
+
+mkdir -p logs
+
+# Create detached tmux session
+tmux new-session -d -s $SESSION_NAME
+
+tmux send-keys -t "$SESSION_NAME" "
+module load Anaconda3/2024.02-1
+source /opt/sw/noarch/softwares/Anaconda3/2024.02-1/etc/profile.d/conda.sh
+conda activate $CONDA_ENV
+cd $WORKDIR
+snakemake --profile config/slurm/ $TARGET
+" C-m
+
+echo "Snakemake is now running in detached tmux session '$SESSION_NAME'."
+echo "Attach with: tmux attach -t $SESSION_NAME"
