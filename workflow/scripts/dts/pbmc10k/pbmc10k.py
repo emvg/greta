@@ -1,7 +1,6 @@
 import os
 import scanpy as sc
 import snapatac2 as snap
-from snapatac2.datasets import _datasets, datasets
 from pathlib import Path
 import pandas as pd
 import numpy as np
@@ -27,8 +26,7 @@ path_output = args['path_output']
 geneids = pd.read_csv(path_geneids).set_index('symbol')['id'].to_dict()
 
 # Change default cache dir
-_datasets = datasets()
-_datasets.path = Path('/tmp/')
+os.environ['SNAP_DATA_DIR'] = '/tmp/'
 
 # Download
 rna = snap.read(snap.datasets.pbmc10k_multiome(modality='RNA', type='h5ad'), backed=None)

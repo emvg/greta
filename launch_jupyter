@@ -1,0 +1,37 @@
+#!/bin/bash
+# Launch Jupyter Lab inside an Apptainer container in a detached tmux session
+
+# -----------------------------
+# Default srun arguments
+# -----------------------------
+DEFAULT_SRUN_ARGS="-t 02:00:00 -N 1 -n 1 -c 4 --mem=64G"
+SRUN_ARGS=${@:-$DEFAULT_SRUN_ARGS}
+
+# -----------------------------
+# Job info
+# -----------------------------
+echo "[JOB SUBMITTED] $(date)"
+CONTAINER="snakemake.sif"
+CONDA_ENV="greta"
+SESSION_NAME="jupyter"
+WORKDIR="/globalscratch/vangysel/greta"
+
+mkdir -p logs
+
+# -----------------------------
+# Create detached tmux session
+# -----------------------------
+tmux new-session -d -s $SESSION_NAME
+
+tmux send-keys -t "$SESSION_NAME" "
+module load Anaconda3/2024.02-1
+source /opt/sw/noarch/softwares/Anaconda3/2024.02-1/etc/profile.d/conda.sh
+cd $WORKDIR
+
+srun $SRUN_ARGS --pty bash -c '
+    jupyter-lab --ip \$(hostname -i | awk '\''{print \$NF}'\'')
+'
+"
+
+echo "Notebook is now running in detached tmux session '$SESSION_NAME'."
+echo "Attach with: tmux attach -t $SESSION_NAME"
