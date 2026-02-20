@@ -16,7 +16,9 @@ keep-incomplete: True
 notemp: True
 rerun-incomplete: False
 default-resources:
-   - runtime=720
+   - runtime=700
    - mem_mb=64000
-   - partition=cpu-single
+   - partition=batch
    - threads=1
+   - tmpdir='/tmp'
+  
