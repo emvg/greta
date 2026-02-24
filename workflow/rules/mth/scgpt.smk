@@ -14,7 +14,7 @@ rule mdl_o_scgpt:
         n_hvg=config['methods']['scgpt']['n_hvg'],
         min_score=config['methods']['scgpt']['min_score'],
     resources:
-        partition='gpu-single',
+        partition=config['slurm']['gpu_partition'],
         mem_mb=restart_mem,
         runtime=1440,
         slurm="gres=gpu:1",
