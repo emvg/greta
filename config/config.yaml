@@ -57,6 +57,9 @@ methods:
     inferelator:
         modular: False
         ext: 500000
+    linger:
+      modular: False
+      version: 'baseline'   
     pando:
         modular: True
         exclude_exons: 'TRUE'
