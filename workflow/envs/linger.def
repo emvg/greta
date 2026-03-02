@@ -1,0 +1,93 @@
+Bootstrap: docker
+From: ubuntu:20.04
+
+%environment
+    # Set paths so the container runs LINGER by default
+    export PATH="/opt/conda/envs/LINGER/bin:/opt/conda/bin:$PATH"
+    export CONDA_PREFIX="/opt/conda/envs/LINGER"
+    export R_HOME="/opt/conda/envs/LINGER/lib/R"
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+
+%post
+    export DEBIAN_FRONTEND=noninteractive
+
+    # 1. Install System Dependencies
+    # We add zlib1g-dev, libbz2-dev, and liblzma-dev which are critical for
+    # bio-tools like HTSlib (used by pybedtools/samtools)
+    apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        gcc \
+        g++ \
+        cmake \
+        wget \
+        curl \
+        git \
+        zlib1g-dev \
+        libbz2-dev \
+        liblzma-dev \
+        libcurl4-openssl-dev \
+        libssl-dev \
+        libxml2-dev \
+        libcairo2-dev \
+        libxt-dev \
+        libopenblas-dev \
+        ca-certificates
+
+    # 2. Install Miniforge (Mamba)
+    wget -O Miniforge3.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
+    bash Miniforge3.sh -b -p "/opt/conda"
+    rm Miniforge3.sh
+    
+    # Source conda for this shell session
+    . "/opt/conda/etc/profile.d/conda.sh"
+    . "/opt/conda/etc/profile.d/mamba.sh"
+
+    # 3. Create the Environment 
+    # We install ALL binary-heavy packages here to prevent pip from building them.
+    # Note: We match pybedtools=0.10.0 to exactly what LingerGRN wants.
+    mamba create -y -n LINGER -c pytorch -c nvidia -c bioconda -c conda-forge \
+        python=3.10 \
+        pip \
+        setuptools \
+        wheel \
+        cython \
+        numpy \
+        pandas=2.2 \
+        scipy \
+        pytorch=2.5.1 \
+        torchvision \
+        torchaudio \
+        bedtools \
+        "pybedtools=0.10.0" \
+        rpy2 \
+        "r-base>=4.2" \
+        r-ggplot2 \
+        r-tidyr \
+        r-egg \
+        homer \
+        scanpy \
+        anndata>=0.10.8 \
+        mudata 
+
+
+    # 4. Set Environment Variables for the Build
+    # This ensures any remaining compilation finds the right libraries
+    export PATH="/opt/conda/envs/LINGER/bin:$PATH"
+    export R_HOME="/opt/conda/envs/LINGER/lib/R"
+    
+    # 5. Install LingerGRN
+    /opt/conda/envs/LINGER/bin/pip install LingerGRN==1.105
+    /opt/conda/envs/LINGER/bin/pip install mudata
+
+    # 6. Clean up
+    /opt/conda/bin/conda clean -a -y
+    pip cache purge
+    apt-get clean
+    rm -rf /var/lib/apt/lists/*
+
+%runscript
+    exec /opt/conda/envs/LINGER/bin/python "$@"
+
+%labels
+    Version v3
