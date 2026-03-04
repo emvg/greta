@@ -117,6 +117,7 @@ rule gen_genome_dictys:
     output: directory('dbs/hg38/gen/genome/dictys/')
     shell:
         """
+        chmod +x $(dirname $(dirname $(which homer)))/share/homer/configureHomer.pl
         homerpath=$(dirname "$(dirname "$(realpath "$(which homer)")")")
         $homerpath/configureHomer.pl -install hg38
         dictys_helper genome_homer.sh hg38 {output}
