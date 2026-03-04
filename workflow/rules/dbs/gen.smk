@@ -439,7 +439,7 @@ rule gen_motif_inferelator:
 
 rule gen_ann_dictys:
     threads: 4
-    conda: '{home_path}/miniforge3/envs/dictys'.format(home_path=home_path)
+    conda: '../../envs/dictys.yaml'
     params:
         url="http://ftp.ensembl.org/pub/release-107/gtf/homo_sapiens/Homo_sapiens.GRCh38.107.gtf.gz"
     input: 'workflow/envs/gretabench.sif'
@@ -447,14 +447,13 @@ rule gen_ann_dictys:
     shell:
         """
         wget --no-verbose {params.url} -O {output}.gtf.gz && \
-        gunzip {output}.gtf.gz
+        gunzip -f {output}.gtf.gz
         dictys_helper gene_gtf.sh {output}.gtf {output} && \
         rm {output}.gtf
         """
 
 rule gen_ann_dictys_mm10:
     threads: 4
-    # conda: '{home_path}/miniforge3/envs/dictys'.format(home_path=home_path)
     conda: '../../envs/dictys.yaml'
     params:
         url="http://ftp.ensembl.org/pub/release-102/gtf/mus_musculus/Mus_musculus.GRCm38.102.gtf.gz"
@@ -463,7 +462,7 @@ rule gen_ann_dictys_mm10:
     shell:
         """
         wget --no-verbose {params.url} -O {output}.gtf.gz && \
-        gunzip {output}.gtf.gz
+        gunzip -f {output}.gtf.gz
         dictys_helper gene_gtf.sh {output}.gtf {output} && \
         rm {output}.gtf
         """
