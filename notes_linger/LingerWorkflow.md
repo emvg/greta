@@ -81,7 +81,7 @@ Contains the prior knowledge, the bulk GRN trained on bulk data.
 
 
 
-## 1.3 data
+## 4 data
 | File | Created by | Content |
 |---|---|---|
 | `data/Peaks.txt` | pseudobulk step | List of ATAC peak IDs in `chr:start-end` format |
