@@ -30,8 +30,12 @@ version = args['version']
 mdata = mu.read(path_mdata)
 adata_RNA = mdata["rna"].copy()
 adata_ATAC = mdata["atac"].copy()
-log(f"RNA adata loaded:\n{adata_RNA}\n")
-log(f"ATAC adata loaded:\n{adata_ATAC}\n")
+
+# Restore raw counts (pseudo_bulk expects raw counts matrices)
+adata_RNA.X = adata_RNA.layers['counts'].copy()
+adata_ATAC.X = adata_ATAC.layers['counts'].copy()
+log(f"adata_RNA loaded:\n{adata_RNA}\n")
+log(f"adata_ATAC loaded:\n{adata_ATAC}\n")
 
 # Add barcode col
 adata_RNA.obs['barcode'] = adata_RNA.obs_names
@@ -41,24 +45,31 @@ adata_ATAC.obs['barcode'] = adata_ATAC.obs_names
 adata_RNA.var['gene_ids'] = adata_RNA.var_names
 adata_ATAC.var['gene_ids'] = adata_ATAC.var_names.str.replace('-', ':', n=1)
 
-# Extract cell type annotation from mdata
-label = pd.DataFrame({'barcode_use': mdata.obs['celltype'].index, 'label': mdata.obs['celltype'].values})
+# Add label col
+adata_RNA.obs['label'] = mdata.obs.loc[adata_RNA.obs_names, 'celltype'].values
+adata_ATAC.obs['label'] = mdata.obs.loc[adata_ATAC.obs_names, 'celltype'].values
 
-# Get the input data for LINGER
-matrix = sp.vstack([adata_RNA.X.T, adata_ATAC.X.T])
-features = pd.DataFrame(adata_RNA.var['gene_ids'].values.tolist() + adata_ATAC.var['gene_ids'].values.tolist(), columns=[1])
-K = adata_RNA.shape[1]
-N = K + adata_ATAC.shape[1]
-types = ['Gene Expression' if i <= K-1 else 'Peaks' for i in range(0, N)]
-features[2] = types
-barcodes = pd.DataFrame(adata_RNA.obs['barcode'].values,columns=[0])
+# Add sample col
+bc = adata_RNA.obs['barcode'].values
+if len(bc[0].split("-")) == 2:
+    adata_RNA.obs['sample'] = [int(s.split("-")[1]) for s in bc]
+    adata_ATAC.obs['sample'] = [int(s.split("-")[1]) for s in bc]
+else:
+    adata_RNA.obs['sample'] = 1
+    adata_ATAC.obs['sample'] = 1
 
-adata_RNA, adata_ATAC = get_adata(matrix, features, barcodes, label) 
+adata_RNA.var_names_make_unique()
+adata_RNA.var['gene_ids'] = adata_RNA.var_names.values  
+
+# Intersect barcodes
+shared = adata_RNA.obs_names.intersection(adata_ATAC.obs_names)
+adata_RNA = adata_RNA[shared].copy()
+adata_ATAC = adata_ATAC[shared].copy()
 log(f"adata_RNA for Linger:\n{adata_RNA}\n")
 log(f"adata_ATAC for Linger:\n{adata_ATAC}\n")
 
 
-# 3) Generate pseudo-bulk
+# Generate pseudo-bulk
 log("Generating pseudo-bulk / metacells...")
 samplelist = list(set(adata_ATAC.obs['sample'].values))
 TG_pseudobulk = pd.DataFrame([])        # TG x metacells
