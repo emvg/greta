@@ -17,4 +17,5 @@ grn['pval'] = 0.01
 
 # Reorder columns
 grn = grn[['source', 'target', 'score', 'pval']]
+grn = grn[grn["score"] != 0]
 grn.to_csv(path_out, index=False)
