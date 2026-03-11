@@ -99,10 +99,34 @@ pd.DataFrame(adata_ATAC.var['gene_ids']).to_csv(out_dir + 'data/Peaks.txt', head
 log("Preprocessing and training LINGER model...")
 genome = 'hg38'
 
-# in Linger's source code (preprocess.py) l_144 `extract_overlap_regions` forgot to prefix peaks path with outdir
-# so we have to chdir to outdir
-GRNdir = os.path.abspath(GRNdir) + "/"
-out_dir = os.path.abspath(out_dir) + "/"
+
+""""
+# LINGER assumes following dir strucutre: 
+.
+├── LINGER_data/
+│   └── data_bulk/
+│
+├── LINGER_output/
+│   ├── cell_population_TF_RE_binding.txt
+│   ├── cell_population_cis_regulatory.txt
+│   ├── cell_population_trans_regulatory.txt
+│   └── ...
+│
+└── data/
+    ├── Peaks.txt
+    ├── TG_pseudobulk.tsv
+    ├── RE_pseudobulk.tsv
+    ├── adata_RNA.h5ad
+    └── adata_ATAC.h5ad
+"""
+
+# LINGER_data/   is dbs/lingerGRN/data_bulk  (GRNdir)
+# LINGER_output/ is dts/{org}/{dat}/cases/{case}/runs/linger/  (out_dir)
+#   ├── data/    is out_dir + data/ (to keep files together)
+
+# since data/ is not at top level anymore, we need to chdir to out_dir
+GRNdir = os.path.abspath(GRNdir) + "/"          
+out_dir = os.path.abspath(out_dir) + "/"        
 os.chdir(out_dir)
 
 print(GRNdir)
