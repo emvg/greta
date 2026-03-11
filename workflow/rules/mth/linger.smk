@@ -12,8 +12,8 @@ rule mdl_o_linger:
         version=config['methods']['linger']['version'],
         script='workflow/scripts/mth/linger/linger.sh'
     resources:
-        mem_mb=32000,
-        runtime=30
+        mem_mb=lambda wildcards, attempt: restart_mem(wildcards, attempt) * 2,
+        runtime=30 if config['methods']['linger']['version'] == 'baseline' else 330,
     shell:
         """
         mkdir -p {output.dir}
