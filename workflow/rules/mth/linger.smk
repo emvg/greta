@@ -1,5 +1,5 @@
 rule mdl_o_linger:
-    threads: 4 #32 for dragon2
+    threads: 32 
     singularity: 'workflow/envs/linger.sif'
     input:
         img='workflow/envs/linger.sif',
@@ -13,7 +13,11 @@ rule mdl_o_linger:
         script='workflow/scripts/mth/linger/linger.sh'
     resources:
         mem_mb=lambda wildcards, attempt: restart_mem(wildcards, attempt) * 2,
-        runtime=30 if config['methods']['linger']['version'] == 'baseline' else 330,
+        runtime=(
+            30 if config['methods']['linger']['version'] == 'baseline'
+            else 60 if config['methods']['linger']['version'] == 'parallel'
+            else 330
+        )
     shell:
         """
         mkdir -p {output.dir}
