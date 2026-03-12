@@ -9,6 +9,7 @@ max-status-checks-per-second: 5
 local-cores: 16
 latency-wait: 15
 use-conda: True
+use-singularity: True
 conda-frontend: conda
 jobs: 64
 printshellcmds: True
