@@ -1,0 +1,39 @@
+#!/bin/bash
+
+CONTAINER="deepmaps.sif"
+DEFAULT_SRUN_ARGS="-t 1:30:00 -N 1 -n 1 -c 8 --mem=64G --gres=gpu:1"
+SRUN_ARGS=${@:-$DEFAULT_SRUN_ARGS}
+
+echo "[JOB SUBMITTED] $(date)"
+
+srun $SRUN_ARGS --pty bash -c '
+    echo "[JOB STARTED] $(date)"
+    echo ""
+
+    module purge
+
+    echo "== Installing IRkernel (first run only) =="
+
+    apptainer exec --nv \
+      --bind $HOME,$PWD,$GLOBALSCRATCH \
+      '"$CONTAINER"' \
+      Rscript -e "
+        dir.create(Sys.getenv(\"R_LIBS_USER\"), recursive=TRUE, showWarnings=FALSE);
+        .libPaths(Sys.getenv(\"R_LIBS_USER\"));
+        Sys.setenv(PKG_CONFIG_PATH=\"\");
+        Sys.setenv(ZMQ_CFLAGS=\"\");
+        Sys.setenv(ZMQ_LIBS=\"\");
+        install.packages(\"pbdZMQ\", repos=\"https://cloud.r-project.org\", type=\"source\");
+        install.packages(\"IRkernel\", repos=\"https://cloud.r-project.org\");
+        IRkernel::installspec(user=TRUE)
+      "
+
+    echo "== Launching JupyterLab =="
+
+    apptainer exec --nv \
+      --bind $HOME,$PWD,$GLOBALSCRATCH,$HOME/.local/share/jupyter:/home/user/.local/share/jupyter \
+      '"$CONTAINER"' \
+      jupyter lab \
+        --ip $(hostname -i | awk '\''{print $NF}'\'') \
+        --no-browser
+'
