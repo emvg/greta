@@ -4,12 +4,14 @@ library(biomaRt)
 orgms <- commandArgs(trailingOnly = TRUE)
 
 get_gene_table <- function(dataset){
+    
     # Connect to the Ensembl database
-    ensembl <- useEnsembl(
-        biomart = 'genes',
+    ensembl <- useMart(
+        biomart = 'ENSEMBL_MART_ENSEMBL',
         dataset = dataset,
-        version = 111
+        host    = 'https://www.ensembl.org'
     )
+
     # Specify the attributes to retrieve
     attributes <- c("ensembl_gene_id", "external_gene_name")
     # Retrieve the data
