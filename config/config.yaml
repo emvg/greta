@@ -363,6 +363,22 @@ dts:
                 n_hvg: 16384
                 n_hvr: 65536
                 root: 'Fibroblast-like'
+    rpe_choroid:
+        organism: 'hg38'
+        celltypes:
+            ['Endothelial', 'Fibroblast', 'Macrophage', 'Melanocyte', 'RPE', 'Schwann', 'Tcell']
+        url:
+            frags_base: 'https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE262151&format=file&file='
+            barcodes: 'https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE262151&format=file&file=GSE262151%5Fbarcodes%2Etsv%2Egz'
+            features: 'https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE262151&format=file&file=GSE262151%5Ffeatures%2Etsv%2Egz'
+            matrix: 'https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE262151&format=file&file=GSE262151%5Fmatrix%2Emtx%2Egz'
+        samples:
+            ['smpl']
+        cases:
+            all:
+                celltypes: 'all'
+                n_hvg: 16384
+                n_hvr: 65536
     skin:
         organism: 'hg38'
         url:

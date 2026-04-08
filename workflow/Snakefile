@@ -114,6 +114,7 @@ include: 'rules/dts/eye.smk'
 include: 'rules/dts/skin.smk'
 include: 'rules/dts/embryo.smk'
 include: 'rules/dts/epalate.smk'
+include: 'rules/dts/rpe_choroid.smk'
 
 # Methods
 include: 'rules/mth/celloracle.smk'
