@@ -29,6 +29,8 @@ print(path_frags)
 if __name__ == '__main__':
     print('N of cores:', n_jobs)
 
+    os.environ["TMPDIR"] = path_tmp
+
     # Change default cache dir
     if not os.path.exists(path_tmp):
         os.mkdir(path_tmp)
