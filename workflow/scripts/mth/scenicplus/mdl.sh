@@ -1,5 +1,6 @@
 #!/bin/bash
 
+TMPDIR='/workdir/vangysel/tmp'
 
 # Parse command-line arguments
 while [[ "$#" -gt 0 ]]; do

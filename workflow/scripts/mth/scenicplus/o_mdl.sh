@@ -1,5 +1,7 @@
 #!/bin/bash
 
+TMPDIR='/workdir/vangysel/tmp'
+export HOME=$(mktemp -d)
 
 # Parse command-line arguments
 while [[ "$#" -gt 0 ]]; do
