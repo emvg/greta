@@ -11,6 +11,7 @@ rule pre_figr:
         runtime=config['max_mins_per_step'],
     shell:
         """
+        export HDF5_USE_FILE_LOCKING=FALSE
         cp {input.mdata} {output.out}
         Rscript workflow/scripts/mth/figr/pre.R \
         {output.out} \
@@ -35,6 +36,7 @@ rule p2g_figr:
         runtime=config['max_mins_per_step'],
     shell:
         """
+        export HDF5_USE_FILE_LOCKING=FALSE
         set +e
         timeout $(({resources.runtime}-20))m \
         Rscript workflow/scripts/mth/figr/p2g.R \
@@ -68,6 +70,7 @@ rule tfb_figr:
         runtime=config['max_mins_per_step'],
     shell:
         """
+        export HDF5_USE_FILE_LOCKING=FALSE
         set +e
         timeout $(({resources.runtime}-20))m \
         Rscript workflow/scripts/mth/figr/tfb.R \
@@ -101,6 +104,7 @@ rule mdl_figr:
         runtime=config['max_mins_per_step'],
     shell:
         """
+        export HDF5_USE_FILE_LOCKING=FALSE
         set +e
         timeout $(({resources.runtime}-20))m \
         Rscript workflow/scripts/mth/figr/mdl.R \
@@ -118,7 +122,7 @@ rule mdl_figr:
 
 
 rule mdl_o_figr:
-    threads: 1
+    threads: 8
     singularity: 'workflow/envs/figr.sif'
     input: rules.extract_case.output.mdata,
     output:
@@ -136,10 +140,12 @@ rule mdl_o_figr:
         runtime=config['max_mins_per_step'] * 2,
     shell:
         """
+        export HDF5_USE_FILE_LOCKING=FALSE
+        cp {input} {output.out}.tmp.h5mu
         set +e
         timeout $(({resources.runtime}-20))m \
         Rscript workflow/scripts/mth/figr/src.R \
-        {input} \
+        {output.out}.tmp.h5mu \
         {params.cellK} \
         {params.organism} \
         {params.ext} \
@@ -149,7 +155,9 @@ rule mdl_o_figr:
         {params.thr_score} \
         {threads} \
         {output.out}
-        if [ $? -eq 124 ]; then
+        EXIT=$?
+        rm -f {output.out}.tmp.h5mu
+        if [ $EXIT -eq 124 ]; then
             awk 'BEGIN {{ print "source,target,score,pval" }}' > {output.out}
         fi
         """

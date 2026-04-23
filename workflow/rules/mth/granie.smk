@@ -132,6 +132,7 @@ rule mdl_o_granie:
     threads: 1
     singularity: 'workflow/envs/granie.sif'
     input:
+        img='workflow/envs/granie.sif',  
         mdata=rules.extract_case.output.mdata,
         gid=rules.gen_gid_ensmbl.output.hg38,
         tfb=rules.gen_motif_granie.output,

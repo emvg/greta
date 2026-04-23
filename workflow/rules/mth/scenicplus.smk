@@ -22,6 +22,8 @@ rule mdl_o_scenicplus:
         runtime=config['max_mins_per_step'],
     shell:
         """
+        export PYBIOMART_CACHE_DISABLED=true
+        export HDF5_USE_FILE_LOCKING=FALSE
         mkdir -p {output.dir}
         set +e
         timeout $(({resources.runtime}-20))m \

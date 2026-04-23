@@ -13,6 +13,7 @@ rule mdl_o_grnboost:
         runtime=config['max_mins_per_step'] * 2,
     shell:
         """
+        export HDF5_USE_FILE_LOCKING=FALSE
         # Create Loom file
         path_tmp=$(dirname {output.out})
         path_tmp=$path_tmp/tmp_grnboost
@@ -57,6 +58,7 @@ rule mdl_o_scenic:
         runtime=config['max_mins_per_step'] * 2,
     shell:
         """
+        export HDF5_USE_FILE_LOCKING=FALSE
         path_tmp=$(dirname {output.out})
         path_tmp=$path_tmp/tmp_scenic
         path_gex=$path_tmp/gex.loom
