@@ -38,7 +38,7 @@ grn = pd.read_csv(grn_path)
 
 def map_regions(a, b):
     def to_df(regions):
-        data = [r.split('-') for r in regions]
+        data = [r.replace(':', '-').split('-') for r in regions]
         return pd.DataFrame(data, columns=['Chromosome','Start','End']).assign(Start=lambda x: x.Start.astype(int), End=lambda x: x.End.astype(int), region=regions)
     pr_a = pr.PyRanges(to_df(a))
     pr_b = pr.PyRanges(to_df(b))
@@ -84,23 +84,27 @@ if grn.shape[0] > 0:
     mdata = mu.read_h5mu(data_path)
     # Filter GRN
     genes = mdata.mod['rna'].var_names
-    peaks = mdata.mod['atac'].var_names
-    cres = grn['cre'].unique()
-    mapped_regions = map_regions(list(peaks), list(cres))
-    grn = pd.merge(grn, mapped_regions, on='cre', how='inner').drop(columns=['cre']).rename(columns={'new_cre': 'cre'})
+    if 'cre' in grn.columns:
+        peaks = mdata.mod['atac'].var_names
+        cres = grn['cre'].unique()
+        mapped_regions = map_regions(list(peaks), list(cres))
+        grn = pd.merge(grn, mapped_regions, on='cre', how='inner').drop(columns=['cre']).rename(columns={'new_cre': 'cre'})
     grn = grn[(grn['target'].isin(genes)) & (grn['source'].isin(genes))]
     # Split and test
-    train, test = train_test_split(mdata.obs_names, test_size=0.33, random_state=42, stratify=mdata.obs['celltype'])
-    cor = test_predictability(mdata=mdata, train=train, test=test, grn=grn, col_source=col_source, col_target=col_target, mod_source=mod_source, mod_target=mod_target)
-    sig_cor = cor[(cor['padj'] < 0.05) & (cor['coef'] > 0.05)]
-    n_hits = sig_cor.shape[0]
-    if n_hits > 0:
-        universe_size = mdata.mod[mod_target].var_names.size
-        rcl = n_hits / universe_size
-        prc = n_hits / cor.shape[0]
-        f01 = f_beta_score(prc, rcl)
+    if col_source in grn.columns and col_target in grn.columns and grn.shape[0] > 0:
+        train, test = train_test_split(mdata.obs_names, test_size=0.33, random_state=42, stratify=mdata.obs['celltype'])
+        cor = test_predictability(mdata=mdata, train=train, test=test, grn=grn, col_source=col_source, col_target=col_target, mod_source=mod_source, mod_target=mod_target)
+        sig_cor = cor[(cor['padj'] < 0.05) & (cor['coef'] > 0.05)]
+        n_hits = sig_cor.shape[0]
+        if n_hits > 0:
+            universe_size = mdata.mod[mod_target].var_names.size
+            rcl = n_hits / universe_size
+            prc = n_hits / cor.shape[0]
+            f01 = f_beta_score(prc, rcl)
+        else:
+            prc, rcl, f01 = 0., 0., 0.
     else:
-        prc, rcl, f01 = 0., 0., 0.
+        prc, rcl, f01 = np.nan, np.nan, np.nan
     df = pd.DataFrame([[grn_name, prc, rcl, f01]], columns=['name', 'prc', 'rcl', 'f01'])
 else:
     df = pd.DataFrame([[grn_name, np.nan, np.nan, np.nan]], columns=['name', 'prc', 'rcl', 'f01'])
