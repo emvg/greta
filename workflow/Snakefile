@@ -31,26 +31,11 @@ def format_rule(out, w, pre, p2g=None, tfb=None, mdl=None, resource=None):
     )
     return frm
 
-
 def make_combs_rules(w, rule_name, do_decoupling=True):
-    from itertools import product
     out = getattr(rules, rule_name).output.out
     rule_outputs = []
-    if w.dat in modular_datasets and do_decoupling:
-        for pre, p2g, tfb, mdl in product(m_mthds, repeat=4):
-            rule_outputs.append(
-                format_rule(out, w=w, pre=pre, p2g=p2g, tfb=tfb, mdl=mdl)
-            )
-    #elif w.dat in stab_datasets:
-    #    for mth in mthds:
-    #        if config['methods'][mth]['modular']:
-    #            rule_outputs.append(format_rule(out, w=w, pre=mth))
-    if w.org == 'hg38':
-        for mth in mthds:
-            rule_outputs.append(format_rule(out, w=w, pre='o_' + mth))
-    elif w.org == 'mm10':
-        for mth in mm10_mthds:
-            rule_outputs.append(format_rule(out, w=w, pre='o_' + mth))
+    for mth in metric_mths:
+        rule_outputs.append(format_rule(out, w=w, pre='o_' + mth))
     return rule_outputs
 
 
@@ -97,6 +82,7 @@ include: 'rules/dbs/gst.smk'
 include: 'rules/dbs/c2g.smk'
 include: 'rules/dbs/prt.smk'
 include: 'rules/dbs/sim.smk'
+include: 'rules/dbs/linger_prior.smk'
 
 # Datasets
 include: 'rules/dts/pbmc10k.smk'
@@ -134,6 +120,7 @@ include: 'rules/mth/scdori.smk'
 include: 'rules/mth/scenic.smk'
 include: 'rules/mth/scgpt.smk'
 include: 'rules/mth/scmtni.smk'
+include: 'rules/mth/linger.smk'
 
 # Analyses
 include: 'rules/anl/metrics/prior.smk'
