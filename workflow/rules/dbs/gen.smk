@@ -113,23 +113,21 @@ rule gen_genome_crema:
 
 rule gen_genome_dictys:
     threads: 4
-    conda: '../../envs/dictys.yaml'
+    singularity: 'workflow/envs/dictys.sif'
+    input: 'workflow/envs/dictys.sif'
     output: directory('dbs/hg38/gen/genome/dictys/')
     shell:
         """
-        homerpath=$(dirname "$(dirname "$(realpath "$(which homer)")")")
-        $homerpath/configureHomer.pl -install hg38
         dictys_helper genome_homer.sh hg38 {output}
         """
 
 rule gen_genome_dictys_mm10:
     threads: 4
-    conda: '../../envs/dictys.yaml'
+    singularity: 'workflow/envs/dictys.sif'
+    input: 'workflow/envs/dictys.sif'
     output: directory('dbs/mm10/gen/genome/dictys/')
     shell:
         """
-        homerpath=$(dirname "$(dirname "$(realpath "$(which homer)")")")
-        $homerpath/configureHomer.pl -install mm10
         dictys_helper genome_homer.sh mm10 {output}
         """
 
@@ -439,10 +437,10 @@ rule gen_motif_inferelator:
 
 rule gen_ann_dictys:
     threads: 4
-    conda: '{home_path}/miniforge3/envs/dictys'.format(home_path=home_path)
+    singularity: 'workflow/envs/dictys.sif'
     params:
         url="http://ftp.ensembl.org/pub/release-107/gtf/homo_sapiens/Homo_sapiens.GRCh38.107.gtf.gz"
-    input: 'workflow/envs/gretabench.sif'
+    input: 'workflow/envs/dictys.sif'
     output: 'dbs/hg38/gen/ann/dictys/ann.bed'
     shell:
         """

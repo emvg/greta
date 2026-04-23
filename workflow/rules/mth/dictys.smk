@@ -146,9 +146,11 @@ rule mdl_dictys:
 
 rule mdl_o_dictys:
     threads: 4
-    conda: '../../envs/dictys.yaml'
-    container: None
+    #conda: '../../envs/dictys.yaml'
+    #container: None
+    singularity: 'workflow/envs/dictys.sif'
     input:
+        img='workflow/envs/dictys.sif',
         mdata=rules.extract_case.output.mdata,
         ann=lambda w: rules.gen_ann_dictys_mm10.output if config['dts'][w.dat]['organism'] == 'mm10' else rules.gen_ann_dictys.output,
         frags=list_frags_files,
@@ -163,7 +165,7 @@ rule mdl_o_dictys:
         thr_score=config['methods']['dictys']['thr_score'],
         use_p2g=False,
     resources:
-        partition='gpu-single',
+        partition='gpu',
         mem_mb=restart_mem,
         runtime=config['max_mins_per_step'] * 4,
         slurm="gres=gpu:1",

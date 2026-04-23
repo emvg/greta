@@ -36,15 +36,20 @@ From: ubuntu:20.04
     . "/opt/conda/etc/profile.d/mamba.sh"
     conda activate
 
-    # Create env
-    mamba create -y -n=env -c lingfeiwang -c conda-forge -c bioconda -c pytorch \
+    # Create env with CUDA-enabled pytorch first, then dictys on top
+    mamba create -y -n env -c pytorch -c nvidia -c conda-forge \
+    --override-channels \
     python=3.10 \
     pip \
+    pytorch::pytorch \
+    pytorch::torchvision \
+    pytorch::torchaudio \
+    pytorch::pytorch-cuda=12.4
+
+    conda activate env
+
+    mamba install -y -n env -c lingfeiwang -c conda-forge -c bioconda \
     dictys \
-    pytorch \
-    torchvision \
-    torchaudio \
-    cpuonly \
     jupyterlab \
     mudata
 
