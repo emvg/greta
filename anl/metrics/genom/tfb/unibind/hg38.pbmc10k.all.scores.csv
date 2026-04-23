@@ -3,8 +3,9 @@ o_celloracle.o_celloracle.o_celloracle.o_celloracle,0.2561085972850678,0.0004631
 o_collectri.o_collectri.o_collectri.o_collectri,0.2614987080103359,0.0016568651848747,0.1024381835091882
 o_dictys.o_dictys.o_dictys.o_dictys,0.3071180258733686,0.0176900515207568,0.2643033465422931
 o_dorothea.o_dorothea.o_dorothea.o_dorothea,0.3085808580858086,0.0009183262562735,0.0714790322621339
-o_figr.o_figr.o_figr.o_figr,,,
+o_granie.o_granie.o_granie.o_granie,0.4,0.0005662912668393,0.0501022949334258
 o_linger.o_linger.o_linger.o_linger,0.1341981823512166,0.0059984012999266,0.1107604716682797
+o_linger_baseline.o_linger_baseline.o_linger_baseline.o_linger_baseline,,,
 o_pando.o_pando.o_pando.o_pando,0.3537549407114624,0.0008788741246037,0.0711016781396129
 o_random.o_random.o_random.o_random,0.0697674418604651,2.454827090162526e-05,0.0023951016613942
 o_scenic.o_scenic.o_scenic.o_scenic,0.2356080823484559,0.0010115841112546,0.0714800228578495
