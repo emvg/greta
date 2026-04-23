@@ -3,20 +3,21 @@ cluster-cancel: "scancel"
 jobscript: "slurm-jobscript.sh"
 cluster: "slurm-submit.py"
 cluster-status: "slurm-status.py"
-restart-times: 5
+restart-times: 0
 max-jobs-per-second: 5
 max-status-checks-per-second: 5
 local-cores: 16
 latency-wait: 15
 use-conda: True
 use-singularity: True
+singularity-args: "--nv --bind /workdir/vangysel:/workdir/vangysel"
 jobs: 64
 printshellcmds: True
 keep-incomplete: True
 notemp: True
 rerun-incomplete: False
 default-resources:
-   - runtime=720
+   - runtime=120
    - mem_mb=64000
-   - partition=cpu-single
+   - partition=batch
    - threads=1
