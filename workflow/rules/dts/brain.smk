@@ -72,10 +72,11 @@ rule callpeaks_brain:
         runtime=2160,
     shell:
         """
+        mkdir -p /workdir/vangysel/tmp/
         python workflow/scripts/dts/callpeaks.py \
         -f {input.frags} \
         -a {input.annot} \
-        -t $TMPDIR \
+        -t /workdir/vangysel/tmp/ \
         -n {threads} \
         -o {output.peaks}
         """

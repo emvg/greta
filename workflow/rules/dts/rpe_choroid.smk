@@ -74,7 +74,7 @@ rule callpeaks_rpe_choroid:
         python workflow/scripts/dts/callpeaks.py \
         -f {input.frags} \
         -a {input.annot} \
-        -t '/tmp/rpe_choroid/' \
+        -t /workdir/vangysel/tmp/ \
         -n {threads} \
         -o {output.peaks}
         """

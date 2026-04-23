@@ -143,10 +143,11 @@ rule callpeaks_epalate:
         runtime=2160,
     shell:
         """
+        export HDF5_USE_FILE_LOCKING=FALSE
         python workflow/scripts/dts/callpeaks_mm10.py \
         -f {input.frag} \
         -a {input.annot} \
-        -t $TMPDIR \
+        -t '/workdir/vangysel/tmp/' \
         -n {threads} \
         -o {output.peaks}
         """

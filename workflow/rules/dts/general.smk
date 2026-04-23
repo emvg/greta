@@ -15,6 +15,7 @@ rule extract_case:
         root=lambda w: config['dts'][w.dat]['cases'][w.case]['root'] if 'root' in config['dts'][w.dat]['cases'][w.case] else 'None',
     shell:
         """
+        export HDF5_USE_FILE_LOCKING=FALSE
         python workflow/scripts/dts/extract_case.py \
         -i '{input}' \
         -c '{params.celltypes}' \
