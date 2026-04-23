@@ -12,7 +12,7 @@ rule genom_tfb:
         grp='source',
     shell:
         """
-        python workflow/scripts/anl/metrics/genom/gnm.py \
+        HDF5_USE_FILE_LOCKING=FALSE python workflow/scripts/anl/metrics/genom/gnm.py \
         -a {input.grn} \
         -b {input.db} \
         -d {params.grp} \
@@ -30,7 +30,7 @@ rule genom_cre:
         out='anl/metrics/genom/cre/{db}/{org}.{dat}.{case}/{pre}.{p2g}.{tfb}.{mdl}.scores.csv'
     shell:
         """
-        python workflow/scripts/anl/metrics/genom/gnm.py \
+        HDF5_USE_FILE_LOCKING=FALSE python workflow/scripts/anl/metrics/genom/gnm.py \
         -a {input.grn} \
         -b {input.db} \
         -f {output}
@@ -49,7 +49,7 @@ rule genom_c2g:
         grp='target',
     shell:
         """
-        python workflow/scripts/anl/metrics/genom/gnm.py \
+        HDF5_USE_FILE_LOCKING=FALSE python workflow/scripts/anl/metrics/genom/gnm.py \
         -a {input.grn} \
         -b {input.resource} \
         -d {params.grp} \

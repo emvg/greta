@@ -12,6 +12,7 @@ rule pred_omics:
         mod_target=lambda w: 'atac' if w.db == 'cretf' else 'rna',
     shell:
         """
+        export HDF5_USE_FILE_LOCKING=FALSE
         python workflow/scripts/anl/metrics/pred/omics.py \
         -a {input.grn} \
         -b {params.col_source} \
@@ -32,6 +33,7 @@ rule pred_gsets:
         out='anl/metrics/pred/gsets/{db}/{org}.{dat}.{case}/{pre}.{p2g}.{tfb}.{mdl}.scores.csv'
     shell:
         """
+        export HDF5_USE_FILE_LOCKING=FALSE
         python workflow/scripts/anl/metrics/pred/gsets.py \
         -i {input.grn} \
         -p {input.rsc} \

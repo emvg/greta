@@ -9,6 +9,7 @@ rule mech_tfa:
         out='anl/metrics/mech/tfa/{db}/{org}.{dat}.{case}/{pre}.{p2g}.{tfb}.{mdl}.scores.csv'
     shell:
         """
+        export HDF5_USE_FILE_LOCKING=FALSE
         python workflow/scripts/anl/metrics/mech/tfa.py \
         -i {input.grn} \
         -b {input.rsc} \
@@ -29,6 +30,7 @@ rule mech_prt:
         runtime=config['max_mins_per_step'] * 2,
     shell:
         """
+        export HDF5_USE_FILE_LOCKING=FALSE
         set +e
         timeout $(({resources.runtime}-20))m \
         python workflow/scripts/anl/metrics/mech/prt.py \
@@ -69,6 +71,7 @@ rule mech_sss:
         runtime=60,
     shell:
         """
+        export HDF5_USE_FILE_LOCKING=FALSE
         set +e
         timeout $(({resources.runtime}-20))m \
     	python workflow/scripts/anl/metrics/mech/sim.py {input.mdata} {input.grn} {params.thr_pval} {output.out}
