@@ -1,0 +1,25 @@
+cluster-sidecar: "slurm-sidecar.py"
+cluster-cancel: "scancel"
+jobscript: "slurm-jobscript.sh"
+cluster: "slurm-submit.py"
+cluster-status: "slurm-status.py"
+restart-times: 0
+max-jobs-per-second: 5
+max-status-checks-per-second: 5
+local-cores: 16
+latency-wait: 15
+use-conda: False
+use-singularity: True
+singularity-args: "--nv --bind /workdir/vangysel/greta --pwd /workdir/vangysel/greta --bind /workdir/vangysel/greta/homer_data:/opt/conda/envs/env/share/homer"
+jobs: 64
+printshellcmds: True
+keep-incomplete: True
+notemp: True
+rerun-incomplete: False
+default-resources:
+   - runtime=700
+   - mem_mb=64000
+   - partition=batch
+   - threads=1
+   - tmpdir='/tmp'
+  
