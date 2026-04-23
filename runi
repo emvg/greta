@@ -1,0 +1,57 @@
+#!/bin/bash
+
+TARGET="${@: -1}"           # last arg
+ARGS="${@:1:$#-1}"          # everything but last arg
+
+CONDA_ENV="base"
+WORKDIR="/workdir/vangysel/greta"
+
+# methods with container: None
+NOSIF=("dictys" "scdori" "scgpt")
+
+FILE=$(basename "$TARGET")
+METHOD=$(echo "$FILE" | cut -d'_' -f2 | cut -d'.' -f1)
+DATASET=$(echo "$TARGET" | cut -d'/' -f3)
+SESSION_NAME="${METHOD}_${DATASET}"
+
+# prevent duplicate sessions
+if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+    echo "tmux session '$SESSION_NAME' already exists. Exiting."
+    exit 1
+fi
+
+tmux new-session -d -s "$SESSION_NAME"
+
+# choose profile based on container usage
+if [[ " ${NOSIF[*]} " =~ " ${METHOD} " ]]; then
+    PROFILE="config/slurm_nosif/"
+else
+    PROFILE="config/slurm/"
+fi
+
+#echo "Method $METHOD on dataset $DATASET uses profile $PROFILE"
+#echo "Session: $SESSION_NAME"
+#echo "snakemake --profile $PROFILE $ARGS $TARGET"
+
+tmux send-keys -t "$SESSION_NAME" "
+conda activate $CONDA_ENV
+cd $WORKDIR
+snakemake --profile $PROFILE $ARGS $TARGET
+" C-m
+
+tmux attach -t "$SESSION_NAME"
+
+## FLAGS UTILES
+
+# --forcerun <rule> 
+# --ri 
+
+#  missing models :
+#
+# dts/hg38/pbmc10k/cases/all/runs/o_dictys.o_dictys.o_dictys.o_dictys.mdl.csv
+# dts/hg38/pbmc10k/cases/all/runs/o_scgpt.o_scgpt.o_scgpt.o_scgpt.mdl.csv
+# dts/hg38/pbmc10k/cases/all/runs/o_scdori.o_scdori.o_scdori.o_scdori.mdl.csv
+# dts/hg38/pbmc10k/cases/all/runs/o_inferelator.o_inferelator.o_inferelator.o_inferelator.mdl.csv
+# dts/hg38/pbmc10k/cases/all/runs/o_scmtni.o_scmtni.o_scmtni.o_scmtni.mdl.csv
+
+# ./runi dts/hg38/pbmc10k/cases/all/runs/o_linger.o_linger.o_linger.o_linger.mdl.csv(base) 
