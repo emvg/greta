@@ -54,7 +54,7 @@ methods:
         ext: 500000
     linger:
       modular: False
-      version: 'LINGER'  # or 'baseline'
+      version: 'baseline'  # or 'baseline'
       mode: 'parallel'   
     pando:
         modular: True
@@ -200,6 +200,7 @@ method_names:
   hummus: HuMMuS
   inferelator: Inferelator3.0
   linger: LINGER
+  linger_baseline: LINGER Baseline
   pando: Pando
   pearson: Pearson
   random: Random
@@ -417,6 +418,7 @@ dts:
 
 
 stab_datasets: ['pitupair']
+stab_mths: ['celloracle', 'collectri', 'dictys', 'dorothea', 'figr', 'granie', 'linger', 'linger_baseline', 'pando', 'random', 'scenic', 'scenicplus']
 modular_datasets: ['pitupair', 'lung', 'embryo', 'skin', 'pbmc10k']
 nocombs_datasets: ['pitupair', 'pitunpair', 'fakepitupair']
 big_datasets: ['brain', 'heartatlas']

@@ -5,8 +5,17 @@ localrules: aggr_metric, metric_summ
 snakemake run_mech_metrics --profile config/slurm/
 snakemake run_pred_metrics --profile config/slurm/
 snakemake run_prior_metrics --profile config/slurm/
-snakemake metric_aggr --profile config/slurm/
+    snakemake metric_aggr --profile config/slurm/
 """ 
+
+"""
+# Run the similarity metrics
+snakemake --profile config/slurm/ anl/topo/hg38.pbmc10k.all.sims_mult.csv
+
+# Run the graph
+snakemake --profile config/slurm/ plt/topo/hg38.pbmc10k.all.topo.pdf
+
+"""
 
 rule aggr_metric:
     threads: 1
@@ -25,15 +34,15 @@ rule aggr_metric:
 # Datasets to run metrics on
 metric_dts = ['pbmc10k']  # , 'brain', 'rpe_choroid'
 
-# Methods to run metrics on 
+# Methods to run metrics on   'figr',
 metric_mths = [
     'celloracle',
     'collectri',   
     'dictys',
     'dorothea',
-    'figr',
     'granie',
     'linger',
+    'linger_baseline',
     'pando',
     'random',
     'scenic',

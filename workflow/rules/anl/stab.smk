@@ -43,7 +43,7 @@ def get_stab_paths(config, mthds, datasets):
         return d_lst, c_lst, m_lst
 
 
-d_lst, c_lst, m_lst = get_stab_paths(config, mthds, stab_datasets)
+d_lst, c_lst, m_lst = get_stab_paths(config, config['stab_mths'], stab_datasets)
 
 rule run_stab:
     threads: 1

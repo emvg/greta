@@ -137,6 +137,7 @@ include: 'rules/anl/dts.smk'
 include: 'rules/anl/metrics/simul.smk'
 
 # Plots
+include: 'rules/plt/topo.smk'
 include: 'rules/plt/stab.smk'
 include: 'rules/plt/pair.smk'
 include: 'rules/plt/comb.smk'
