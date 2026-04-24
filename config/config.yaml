@@ -418,7 +418,7 @@ dts:
 
 
 stab_datasets: ['pitupair']
-stab_mths: ['celloracle', 'collectri', 'dictys', 'dorothea', 'figr', 'granie', 'linger', 'linger_baseline', 'pando', 'random', 'scenic', 'scenicplus']
+stab_mths: ['linger']
 modular_datasets: ['pitupair', 'lung', 'embryo', 'skin', 'pbmc10k']
 nocombs_datasets: ['pitupair', 'pitunpair', 'fakepitupair']
 big_datasets: ['brain', 'heartatlas']

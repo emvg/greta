@@ -17,6 +17,15 @@ args = parser.parse_args()
 config = read_config()
 METHOD_NAMES = config['method_names']
 COLORS       = config['colors']['nets']
+
+plt.rcParams.update({
+    'font.size':        21,
+    'axes.titlesize':   23,
+    'axes.labelsize':   21,
+    'xtick.labelsize':  17,
+    'ytick.labelsize':  17,
+    'legend.fontsize':  17,
+})
 ORDERED_METHODS = [
     'celloracle', 'dictys', 'figr', 'granie', 'linger', 'linger_baseline', 'pando',
     'collectri', 'dorothea', 'random', 'scenic', 'scenicplus',
@@ -54,10 +63,10 @@ def heatmap_ax(ax, mat, title, show_yticklabels=True, show_cbar=False):
         cbar_kws={'shrink': 0.6, 'label': 'Overlap\nCoefficient'} if show_cbar else {},
         square=True,
     )
-    ax.set_title(title, fontsize=9)
-    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='right', fontsize=7)
+    ax.set_title(title)
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='right')
     if show_yticklabels:
-        ax.set_yticklabels(ax.get_yticklabels(), rotation=0, fontsize=7)
+        ax.set_yticklabels(ax.get_yticklabels(), rotation=0)
     ax.set_xlabel('')
     ax.set_ylabel('')
 
@@ -68,8 +77,8 @@ def barplot_ax(ax, col, xlabel):
     sub['pretty'] = sub['name'].map(METHOD_NAMES).fillna(sub['name'])
     sub['color']  = sub['name'].map(COLORS).fillna('gray')
     ax.barh(sub['pretty'], sub[col], color=sub['color'], edgecolor='white', height=0.7)
-    ax.set_xlabel(xlabel, fontsize=8)
-    ax.tick_params(axis='both', labelsize=7)
+    ax.set_xlabel(xlabel)
+    ax.tick_params(axis='both')
     ax.invert_yaxis()
 
 
@@ -81,16 +90,16 @@ stat_cols = [
     ('odegree',  'Regulon size'),
 ]
 n = len(stat_cols)
-h = max(3, len(present) * 0.35)
-fig_a, axes = plt.subplots(1, n, figsize=(n * 2.2 + 2.5, h))
+h = max(5, len(present) * 0.55)
+fig_a, axes = plt.subplots(1, n, figsize=(n * 3.5 + 4.5, h), constrained_layout=True)
+fig_a.get_layout_engine().set(w_pad=0.2)
 for i, (ax, (col, label)) in enumerate(zip(axes, stat_cols)):
     barplot_ax(ax, col, label)
     if i > 0:
         ax.tick_params(labelleft=False)
-fig_a.tight_layout(w_pad=0.3)
 
 # --- panel c: TFs / CREs / Genes together, then Edges alone ----------------
-sz = max(3, len(present) * 0.35)
+sz = max(5, len(present) * 0.55)
 
 # TFs, CREs, Genes side by side — shared colorbar on the right
 fig_c1, axes_c1 = plt.subplots(1, 3, figsize=(sz * 3 + 1.2, sz))

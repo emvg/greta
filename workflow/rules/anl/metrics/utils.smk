@@ -14,7 +14,12 @@ snakemake --profile config/slurm/ anl/topo/hg38.pbmc10k.all.sims_mult.csv
 
 # Run the graph
 snakemake --profile config/slurm/ plt/topo/hg38.pbmc10k.all.topo.pdf
+"""
 
+"""
+# Run stability metrics on LINGER
+
+snakemake --profile config/slurm/ anl/stab/pitupair.ovc.csv -n
 """
 
 rule aggr_metric:
