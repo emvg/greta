@@ -1,0 +1,9 @@
+type,mth,cat,auc
+s_ocoeff,linger,fixed_nfeats,0.8981974418095624
+c_ocoeff,linger,fixed_nfeats,0.33185319977796507
+t_ocoeff,linger,fixed_nfeats,0.6866530647821291
+e_ocoeff,linger,fixed_nfeats,0.21576152372402618
+s_ocoeff,linger,fixed_ncells,0.6180983347516594
+c_ocoeff,linger,fixed_ncells,0.37712443152139197
+t_ocoeff,linger,fixed_ncells,0.4951278959204911
+e_ocoeff,linger,fixed_ncells,0.1614983536034732
