@@ -5,7 +5,7 @@ localrules: aggr_metric, metric_summ
 snakemake run_mech_metrics --profile config/slurm/
 snakemake run_pred_metrics --profile config/slurm/
 snakemake run_prior_metrics --profile config/slurm/
-    snakemake metric_aggr --profile config/slurm/
+snakemake metric_aggr --profile config/slurm/
 """ 
 
 """
@@ -42,7 +42,8 @@ metric_dts = ['pbmc10k']  # , 'brain', 'rpe_choroid'
 # Methods to run metrics on   'figr',
 metric_mths = [
     'celloracle',
-    'collectri',   
+    'collectri',  
+    'deepmaps',
     'dictys',
     'dorothea',
     'granie',

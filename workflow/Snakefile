@@ -121,6 +121,7 @@ include: 'rules/mth/scenic.smk'
 include: 'rules/mth/scgpt.smk'
 include: 'rules/mth/scmtni.smk'
 include: 'rules/mth/linger.smk'
+include: 'rules/mth/deepmaps.smk'
 
 # Analyses
 include: 'rules/anl/metrics/prior.smk'
