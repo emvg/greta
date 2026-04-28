@@ -10,9 +10,14 @@ out_dir = args['out_dir']
 path_out = args['path_out'] 
 
 # Load three cell population GRNs
-alpha = pd.read_csv(f'{out_dir}/cell_population_TF_RE_binding.txt', sep='\t', index_col=0)
-beta  = pd.read_csv(f'{out_dir}/cell_population_cis_regulatory.txt', sep='\t', header=None)
-gamma = pd.read_csv(f'{out_dir}/cell_population_trans_regulatory.txt', sep='\t', index_col=0)
+try:
+    alpha = pd.read_csv(f'{out_dir}/cell_population_TF_RE_binding.txt', sep='\t', index_col=0)
+    beta  = pd.read_csv(f'{out_dir}/cell_population_cis_regulatory.txt', sep='\t', header=None)
+    gamma = pd.read_csv(f'{out_dir}/cell_population_trans_regulatory.txt', sep='\t', index_col=0)
+except pd.errors.EmptyDataError:
+    pd.DataFrame(columns=['source', 'cre', 'target', 'score']).to_csv(path_out, index=False)
+    exit(0)
+
 beta.columns = ['RE', 'TG', 'beta']
 
 alpha.index.name = 'RE'

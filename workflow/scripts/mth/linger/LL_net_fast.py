@@ -218,14 +218,16 @@ def TF_RE_LINGER_chr(chr,outdir):
     AAA=np.abs(data0[['x']].values)
     N=data_merge_temp.shape[0]
     times=int(np.floor(N/batchsize))
-    resultlist=[0 for i in range(times+1)]
+    resultlist=[pd.DataFrame() for i in range(times+1)]
+    ii = -1
     for ii in tqdm(range(times), desc=chr):
         result_all=pd.DataFrame([])
         for j in range(ii*batchsize,(ii+1)*batchsize):
             if (AAA[j]>0)&(AAA[j]<10):
                 result=get_TF_RE(data_merge_temp,j,net_all,TFindex,TFName,REindex,REName)
                 result_all=pd.concat([result_all,result],axis=0)
-        result_all=result_all.groupby(['TF', 'RE'])['score'].max().reset_index()
+        if result_all.shape[0]>0:
+            result_all=result_all.groupby(['TF', 'RE'])['score'].max().reset_index()
         resultlist[ii]=result_all
     result_all=pd.DataFrame([])
     ii=ii+1
@@ -237,6 +239,8 @@ def TF_RE_LINGER_chr(chr,outdir):
         result_all=result_all.groupby(['TF', 'RE'])['score'].max().reset_index()
     resultlist[ii]=result_all
     result_all1=pd.concat(resultlist,axis=0)
+    if result_all1.shape[0]==0 or 'TF' not in result_all1.columns:
+        return pd.DataFrame()
     A=result_all1.groupby(['TF', 'RE'])['score'].max().reset_index()
     mat,REs,TFs=list2mat(A,'RE','TF','score')
     mat=pd.DataFrame(mat,index=REs,columns=TFs)
@@ -645,10 +649,9 @@ def cis_shap(chr,outdir):
                     TG_2.append(geneName[ii])
                     RE_2.append(REName_temp[k])
                     score_2.append(zscored_arr[k+len(zscored_arr)-len(REidxtemp)])
-    RE_TG=pd.DataFrame(TG_2)
-    RE_TG.columns=['TG']
-    RE_TG['RE']=RE_2
-    RE_TG['score']=score_2
+    RE_TG=pd.DataFrame({'TG': TG_2, 'RE': RE_2, 'score': score_2})
+    if RE_TG.shape[0]==0:
+        return RE_TG
     RE_TG=RE_TG.groupby(['RE', 'TG'])['score'].max().reset_index()
     return RE_TG
 def trans_shap(chr,outdir):
@@ -673,14 +676,14 @@ def trans_shap(chr,outdir):
             TG_1.append(geneName[ii])
             TF_1.append(TFName_temp[k])
             score_1.append(zscored_arr[k])
-    TF_TG=pd.DataFrame(TG_1)
-    TF_TG.columns=['TG']
-    TF_TG['TF']=TF_1
-    TF_TG['score']=score_1
+    TF_TG=pd.DataFrame({'TG': TG_1, 'TF': TF_1, 'score': score_1})
+    if TF_TG.shape[0]==0:
+        return pd.DataFrame()
     mat,TGs,TFs=list2mat(TF_TG,'TG','TF','score')
     mat=pd.DataFrame(mat,index=TGs,columns=TFs)
     mat.fillna(0, inplace=True)
     return mat
+
       
 def load_RE_TG(GRNdir,chrN,O_overlap_u,O_overlap_hg19_u,O_overlap):   
     #print('load prior RE-TG ...')

@@ -90,10 +90,14 @@ def load_corr_RE_TG(List,Element_name,Element_name_bulk,outdir):
 	#index_Element_name_bulk1=index_Element_name_bulk.loc[RE_all_b][0].values
 	return merged_s,merged_b
 
+
 def load_motifbinding_chr(chrN,GRNdir,motifWeight,outdir):
     Motif_binding_temp=pd.read_csv(GRNdir+'MotifTarget_Matrix_'+chrN+'.txt',sep='\t',index_col=0)
     REs=Motif_binding_temp.index
-    march_hg19_Regrion=pd.read_csv(outdir+'MotifTarget_hg19_hg38_'+chrN+'.txt',sep='\t',header=None)
+    try:
+        march_hg19_Regrion=pd.read_csv(outdir+'MotifTarget_hg19_hg38_'+chrN+'.txt',sep='\t',header=None)
+    except pd.errors.EmptyDataError:
+        return pd.DataFrame(columns=Motif_binding_temp.columns)
     REoverlap=list(set(march_hg19_Regrion[1].values))
     Motif_binding_temp1=Motif_binding_temp.loc[REoverlap]
     REs=Motif_binding_temp1.index
@@ -107,7 +111,8 @@ def load_motifbinding_chr(chrN,GRNdir,motifWeight,outdir):
     Motif_binding = np.diag(1.0 / (motifWeight.T + 0.1)) * Motif_binding_temp1.values.T
     Motif_binding = np.log1p(Motif_binding)
     return Motif_binding_temp1    
-    #return Motif_binding      # why not ?    
+    #return Motif_binding      # why not ?
+  
 
 def load_TFbinding(GRNdir,motifWeight,Match2,TFName,Element_name,outdir):
     chrall=['chr'+str(i+1) for i in range(22)]
@@ -149,7 +154,16 @@ def _process_chr_overlap(chrtemp, GRNdir, genome, outdir):
     b = pybedtools.example_bedtool(GRNdir+'MotifTarget_matrix_'+chrtemp+'.bed')
     a_with_b = a.intersect(b, wa=True,wb=True)
     a_with_b.saveas(outdir+'temp_'+chrtemp+'.bed')
-    a_with_b = pd.read_csv(outdir+'temp_'+chrtemp+'.bed', sep='\t', header=None)
+    try:
+        a_with_b = pd.read_csv(outdir+'temp_'+chrtemp+'.bed', sep='\t', header=None)
+    except pd.errors.EmptyDataError:
+        pd.DataFrame(columns=['column1', 'column2']).to_csv(
+            outdir+'MotifTarget_hg19_hg38_'+chrtemp+'.txt', sep='\t', header=None, index=None)
+        a = pybedtools.example_bedtool(GRNdir+genome+'_Peaks_'+chrtemp+'.bed')
+        b = pybedtools.example_bedtool(outdir+'Region.bed')
+        a.intersect(b, wa=True, wb=True).saveas(outdir+'Region_overlap_'+chrtemp+'.bed')
+        os.remove(outdir+'temp_'+chrtemp+'.bed')
+        return
     a_with_b=a_with_b[(a_with_b[1].values==a_with_b[7].values)&(a_with_b[2].values==a_with_b[8].values)]
     a_with_b_n = pd.DataFrame({
     'column1': a_with_b[3] + ':' + a_with_b[4].astype(str) + '-' + a_with_b[5].astype(str),
