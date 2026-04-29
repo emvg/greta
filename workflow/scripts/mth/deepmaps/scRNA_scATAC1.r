@@ -591,7 +591,7 @@ run_HGT <- function(GAS,result_dir,data_type,envPath=NULL,lr=NULL, epoch=NULL, n
   cat(lr, epoch, n_hid, n_heads, cuda)
   if (!is.null(envPath)){use_condaenv(envPath)}
   list_in <- assign("list_in", list(lr=lr, epoch=epoch, n_hid=n_hid, n_heads=n_heads, result_dir=result_dir, cuda=cuda, data_type=data_type, cell_gene=GAS, gene_name=rownames(GAS), cell_name=colnames(GAS)), envir = .GlobalEnv) 
-    source_python('arg.py')
+    source_python('workflow/scripts/mth/deepmaps/arg.py')
     cell_hgt_matrix <- py$cell_matrix
     gene_hgt_matrix <- py$gene_matrix
     attention <- py$df2

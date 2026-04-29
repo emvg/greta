@@ -1,8 +1,8 @@
 rule mdl_o_deepmaps:
-    threads: 2 
+    threads: 12
     singularity: 'workflow/envs/deepmaps.sif'
     input:
-        img='workflow/envs/linger.sif',
+        img='workflow/envs/deepmaps.sif',
         mdata=rules.extract_case.output.mdata
     output:
         dir=directory('dts/{org}/{dat}/cases/{case}/runs/deepmaps/'),
@@ -10,8 +10,8 @@ rule mdl_o_deepmaps:
     params:
         script='workflow/scripts/mth/deepmaps/deepmaps.sh'
     resources:
-        mem_mb= lambda wildcards, attempt: restart_mem(wildcards, attempt) * 2,
-        runtime=30
+        mem_mb= lambda wildcards, attempt: restart_mem(wildcards, attempt) * 4,
+        runtime=400
     shell:
         """
         export HDF5_USE_FILE_LOCKING=FALSE
