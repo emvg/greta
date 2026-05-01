@@ -11,9 +11,10 @@ parser = argparse.ArgumentParser(description='DeepMAPS - Run LISA2')
  
 parser.add_argument("--path", help="Gene module path", default="")
 parser.add_argument("--species", help="reference", default="hg38")
+parser.add_argument("--lisa_data", help="Path to pre-downloaded LISA reference data", default="")
 args = parser.parse_args()
 
-di.DataInterface.data_path = args.path
+di.DataInterface.data_path = args.lisa_data if args.lisa_data else args.path
 
 def file_name(file_dir):
     L = []
