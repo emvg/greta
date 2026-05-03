@@ -1,3 +1,6 @@
+#!/usr/bin/env Rscript
+
+library(Matrix)
 library(dplyr)
 
 args <- commandArgs(trailingOnly = TRUE)
@@ -14,17 +17,28 @@ out_dir  <- get_arg("-d")
 path_out <- get_arg("-o")
 obj_dir  <- file.path(out_dir, "objects")
 
-# Load required objects from DeepMaps run
+# load seurat obj to get cell type annotations
+obj        <- readRDS(file.path(obj_dir, "seurat_obj.rds"))
+annotation <- data.frame(
+  barcode   = colnames(obj),
+  cell_type = obj$cell_type,
+  stringsAsFactors = FALSE
+)
+
+# ---- Load -------------------------------------------------------------------
 message("[grn.R] Loading objects from ", obj_dir)
 ct_regulon    <- readRDS(file.path(obj_dir, "ct_regulon.rds"))
 RI_CT         <- readRDS(file.path(obj_dir, "RI_CT.rds"))
 gene_peak_pro <- readRDS(file.path(obj_dir, "gene_peak_pro.rds"))
 peak_TF       <- readRDS(file.path(obj_dir, "peak_TF.rds"))
 
+# gene_peak_pro is saved as dgCMatrix — coerce for safe row/col subsetting
+gene_peak_pro <- as.matrix(gene_peak_pro)
+
 message("  ", length(ct_regulon), " regulons, ",
         nrow(RI_CT), " (TF,TG) pairs x ", ncol(RI_CT), " clusters")
 
-# Build TF–RE–TG triplets 
+# ---- Build TF-RE-TG triplets ------------------------------------------------
 message("[grn.R] Building TF-RE-TG triplets")
 triplets <- list()
 idx <- 0L
@@ -36,10 +50,10 @@ for (reg_name in names(ct_regulon)) {
   for (target in ct_regulon[[reg_name]]) {
     pair_key <- paste0(tf, "_", target)
 
-    # cluster-level RI score
     ri <- if (pair_key %in% rownames(RI_CT) && ct %in% colnames(RI_CT)) {
       RI_CT[pair_key, ct]
     } else { NA_real_ }
+
     if (is.na(ri) || ri <= 0) next
 
     # Supporting CREs: peaks in C_ti = {k : w_ik > 0 and b_kt > 0}.
@@ -67,24 +81,32 @@ for (reg_name in names(ct_regulon)) {
 grn_celltype <- bind_rows(triplets)
 message("  ", nrow(grn_celltype), " cluster-resolved triplets")
 
-# Cell-population GRN: max score across clusters per (TF, RE, TG) 
+# ---- Cell-population GRN: max score across clusters per (TF, RE, TG) -------
 message("[grn.R] Pooling to cell-population level")
 grn <- grn_celltype %>%
   group_by(source, cre, target) %>%
-  summarise(
+  dplyr::summarise(
     score                  = max(score),
     peak_to_gene_potential = first(peak_to_gene_potential),
     peak_TF_affinity       = first(peak_TF_affinity),
     .groups                = "drop"
   )
 
+ct_table       <- table(obj$cell_type, obj$seurat_clusters)
+cluster_labels <- rownames(ct_table)[apply(ct_table, 2, which.max)]
+names(cluster_labels) <- colnames(ct_table)
+
+grn_celltype$cell_type <- cluster_labels[grn_celltype$cluster]
+
+# ---- Write ------------------------------------------------------------------
 write.csv(grn, path_out, row.names = FALSE)
 message("  Population GRN -> ", path_out, " (", nrow(grn), " triplets)")
 
 ct_out <- sub("\\.csv$", "_celltype.csv", path_out)
 write.csv(grn_celltype, ct_out, row.names = FALSE)
-message("  Cell-type GRN  -> ", ct_out,   " (", nrow(grn_celltype), " triplets)")
+message("  Cell-type GRN  -> ", ct_out, " (", nrow(grn_celltype), " triplets)")
 
+# ---- Summary ----------------------------------------------------------------
 message("[grn.R] Summary")
 message("  TFs:     ", length(unique(grn$source)))
 message("  Targets: ", length(unique(grn$target)))

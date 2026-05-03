@@ -94,6 +94,16 @@ atac_counts <- sparseMatrix(
   dimnames = list(atac_peaks, atac_cells)
 )
 
+# Cell type annotation
+ann_barcodes  <- f[["obs/_index"]][]
+ann_codes     <- f[["obs/celltype/codes"]][]
+ann_labels    <- f[["obs/celltype/categories"]][]
+annotation    <- data.frame(
+  barcode   = ann_barcodes,
+  cell_type = ann_labels[ann_codes + 1],
+  stringsAsFactors = FALSE
+)
+
 f$close_all()
 
 # Align cells: keep the intersection of both modalities
@@ -117,8 +127,11 @@ obj[["percent.mt"]] <- PercentageFeatureSet(obj, pattern = "^MT-")
 
 # Cell QC filter (matches filterCell() logic from scRNA_scATAC1.r)
 obj <- filterCell(obj, data_type = "scRNA_scATAC")
-
 message("Cells after QC: ", ncol(obj))
+
+obj$cell_type <- annotation$cell_type[match(colnames(obj), annotation$barcode)]
+message("Cell types: ", paste(sort(unique(obj$cell_type)), collapse = ", "))
+
 
 # =============================================================================
 # 2. Peak-gene regulatory potential (MAESTRO)
