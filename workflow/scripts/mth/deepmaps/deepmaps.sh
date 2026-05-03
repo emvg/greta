@@ -11,7 +11,14 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 
-Rscript "workflow/scripts/mth/deepmaps/deepmaps.r" \
+export TMPDIR="/workdir/vangysel/tmp/${SLURM_JOB_ID:-tmp}"
+mkdir -p "$TMPDIR"
+
+Rscript "workflow/scripts/mth/deepmaps/deepmaps.R" \
   -m "$path_mdata" \
+  -d "$out_dir" \
+  -o "$path_out"
+
+Rscript "workflow/scripts/mth/deepmaps/grn.R" \
   -d "$out_dir" \
   -o "$path_out"
