@@ -11,7 +11,9 @@ rule mdl_o_deepmaps:
         script='workflow/scripts/mth/deepmaps/deepmaps.sh'
     resources:
         mem_mb= lambda wildcards, attempt: restart_mem(wildcards, attempt) * 4,
-        runtime=400
+        runtime=300,
+        partition='gpu',
+        slurm="--gres=gpu:GeForceRTX2080Ti:1" #"gres=gpu:1",
     shell:
         """
         export HDF5_USE_FILE_LOCKING=FALSE
