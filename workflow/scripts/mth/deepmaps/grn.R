@@ -94,9 +94,9 @@ grn <- grn_celltype %>%
 
 ct_table       <- table(obj$cell_type, obj$seurat_clusters)
 cluster_labels <- rownames(ct_table)[apply(ct_table, 2, which.max)]
-names(cluster_labels) <- colnames(ct_table)
-
+names(cluster_labels) <- paste0("ct", colnames(ct_table)) 
 grn_celltype$cell_type <- cluster_labels[grn_celltype$cluster]
+
 
 # ---- Write ------------------------------------------------------------------
 write.csv(grn, path_out, row.names = FALSE)
