@@ -625,13 +625,12 @@ run_HGT <- function(GAS,result_dir,data_type,envPath=NULL,lr=NULL, epoch=NULL, n
 
 get_gene_module <-
   function(obj, GAS, att, cutoff = 1.6, method = NULL) {
-    if (method == ' '){
+    if (method == 'SFP'){
 
       `%!in%` <- Negate(`%in%`) # define the negation of %in%
       
       
       n.matching <- 10 # the number of predicting maximum matching
-      # set thdf2 = 0.3 to reduce the number of edges ?
       m<-inp(GAS, HGT_result[['attention']], HGT_result[['cell_hgt_matrix']], HGT_result[['feature_hgt_matrix']], l=1.2)
       df1 <- m[[1]]
       df2 <- m[[2]]
@@ -1328,49 +1327,33 @@ calDR_v2 <-
 # steiner nodes refer to the non-terminals in the steiner forest
 
 get_modules <- function(steiner.ig, terminals, out.file = 'examples/SFP_edges.csv') {
-  
-  # steiner.ig : the graph
-  # terminals : the terminal list
-  # steiner.es : the edge list in the steiner forest
-  
-  #  steiner.vs <- V(steiner.ig)[setdiff(V(steiner.ig)[unique(as.vector(ends(graph = steiner.ig, es = steiner.es)))], 
-  #                             V(steiner.ig)[Reduce(union, terminals)])]
-  
+
   steiner.vs <- setdiff(as_ids(V(steiner.ig)), Reduce(union, terminals))
-  # build a data frame for the steiner edges
-  
-  # retain the edges connecting the terminal nodes and steiner nodes
+
   between.ll <- lapply(terminals, function(ter) {
-    return(E(steiner.ig)[ter %--% steiner.vs]) # get the steiner edges between
-    # the terminal nodes and the steiner nodes
+    # FIX: drop cells absent from steiner.ig
+    ter_valid <- ter[ter %in% V(steiner.ig)$name]
+    return(E(steiner.ig)[ter_valid %--% steiner.vs])
   })
-  
-  # arrange the edge list into the format of four columns, i.e. 
-  # - terminal - terminal id, e.g., 1, 2, or 3
-  # - terminal_node - the node in a terminal
-  # - steiner_node - the non-terminal node connected to a terminal node, i.e., steiner node
-  # - weight - the weight of the edge connecting a terminal node and steiner node, e.g., 1 and 2
+
   es.info <- do.call('rbind', lapply(seq_along(between.ll), function(i) {
-    x <- between.ll[[i]] # an edge list
+    x <- between.ll[[i]]
+    if (length(x) == 0) return(NULL)  # FIX: skip empty terminals
     x.df <- data.frame(ends(graph = steiner.ig, es = x))
-    # convert edge list into a data frame
-    
-    # rearrange the order of edge ends
+
     suppressMessages(library(data.table))
+    # FIX: use ter_valid for the rearrangement check
+    ter_valid <- terminals[[i]][terminals[[i]] %in% V(steiner.ig)$name]
     xx.df <- rbindlist(apply(x.df, 1, function(y) {
-      if (y[1] %in% terminals[[i]]) y else list(y[2], y[1])
+      if (y[1] %in% ter_valid) y else list(y[2], y[1])
     }), fill = F)
-    
-    colnames(xx.df) <- c('terminal_node', 'steiner_node') # name the columns
-    xx.df <- cbind(terminal = rep(as.numeric(names(between.ll)[i]), nrow(xx.df)), xx.df, 
+
+    colnames(xx.df) <- c('terminal_node', 'steiner_node')
+    xx.df <- cbind(terminal = rep(as.numeric(names(between.ll)[i]), nrow(xx.df)), xx.df,
                    weight = x$weight)
-    # add the terminal ids and edge weights as a column, respectively
-    
     return(xx.df)
   }))
-  
-  #write.csv(es.info, file = out.file, quote = F) # save the result to a csv file
-  
+
   return(es.info)
 }
 
@@ -1383,71 +1366,57 @@ get_modules <- function(steiner.ig, terminals, out.file = 'examples/SFP_edges.cs
 # 
 # return an edge sequence of the steiner forest
 set_cover_mst <- function(G, terminals) {
-
-  # G : the weighted/unweighted undirected graph saved in an igraph object
-  # terminals : the terminal set saved in a nested list
-
   `%!in%` <- Negate(`%in%`)
   suppressMessages(library(parallel))
-  n_cores <- as.integer(Sys.getenv("SLURM_CPUS_PER_TASK", unset = detectCores()))
-  mst.ll <- mclapply(terminals, function(ter) {
-    ter.nbr <- Reduce(union, lapply(ter, function(v) {
-      return(as_ids(neighbors(graph = G, v = v, mode = 'all')))}))
-    # get neighbors of a terminal
-    
-    sub.G <- induced_subgraph(graph = G, v = union(ter, ter.nbr))
-    # build a subgraph
-    
-    ter.mst <- mst(graph = sub.G, weights = E(sub.G)$weight, algorithm = 'prim')
-    # minimum spanning tree for a subgraph
-    
-    mst.deg <- degree(graph = ter.mst, v = V(ter.mst), mode = 'all')
-    # get the dgree of nodes in the minimum spanning tree
-    
-    leaves <- names(mst.deg)[mst.deg == 1] # get all the leaves
-    return(induced_subgraph(graph = ter.mst, 
-                            v = setdiff(as_ids(V(ter.mst)), 
-                                        leaves[leaves %!in% ter])))
-    # remove the nodes not belonging to the terminal and get the edges
-  }, mc.cores = n_cores)
-  
-  Ugraph <- Reduce(`%u%`, mst.ll) # get the union of all the 
-  # minimum spanning trees
-  
-  edge.ids <- get.edge.ids(graph = G, vp = as.vector(t(ends(graph = Ugraph, 
-                                                            es = E(Ugraph))))) # get edge ids
-  E(Ugraph)$weight <- E(G)[edge.ids]$weight
-  # assign edge weights according to that on the original graph
-  
-  steiner.ig <- mst(graph = Ugraph, weights = E(Ugraph)$weight, algorithm = 'prim')
-  # minimum spanning tree for a subgraph
-  
-  Uter <- Reduce(union, terminals) # the union of all terminals
-  
-  while (1) {
-    Udeg <- degree(graph = steiner.ig, v = V(steiner.ig), mode = 'all')
-    # get the dgree of nodes in the minimum spanning tree
-    
-    leaves <- names(Udeg)[Udeg == 1] # get all the leaves
-    steiner.leaves <- leaves[leaves %!in% Uter] # the non-terminal nodes with degree one
-    
-    #        cat (steiner.leaves, '\n\n')
-    
-    if (length(steiner.leaves) < 1) {
-      break
+  n_cores <- min(
+    length(terminals),
+    as.integer(Sys.getenv("SLURM_CPUS_PER_TASK", unset = detectCores()))
+  )
+  message(sprintf("Using %d cores for %d terminals", n_cores, length(terminals)))
+
+  mst.ll <- mclapply(seq_along(terminals), function(idx) {
+    ter       <- terminals[[idx]]
+    # FIX 1: drop cells absent from G
+    ter_valid <- ter[ter %in% V(G)$name]
+    if (length(ter_valid) < length(ter)) {
+      message(sprintf("  Terminal %d ('%s'): %d / %d cells dropped (not in G)",
+                      idx, names(terminals)[idx],
+                      length(ter) - length(ter_valid), length(ter)))
     }
-    
-    #  steiner.ig <- induced_subgraph(graph = Umst, 
-    #                          v = setdiff(as_ids(V(Umst)), 
-    #                                      leaves[leaves %!in% Uter]))
-    
-    steiner.ig <- delete_vertices(graph = steiner.ig, 
-                                  v = steiner.leaves) # delete nodes
-    #        cat (length(V(steiner.ig)), '\n\n')
+    if (length(ter_valid) == 0) return(NULL)
+
+    ter.nbr <- Reduce(union, lapply(ter_valid, function(v) {
+      as_ids(neighbors(graph = G, v = v, mode = 'all'))
+    }))
+    sub.G   <- induced_subgraph(graph = G, v = union(ter_valid, ter.nbr))
+    ter.mst <- mst(graph = sub.G, weights = E(sub.G)$weight, algorithm = 'prim')
+    mst.deg <- degree(graph = ter.mst, v = V(ter.mst), mode = 'all')
+    leaves  <- names(mst.deg)[mst.deg == 1]
+    induced_subgraph(graph = ter.mst,
+                     v     = setdiff(as_ids(V(ter.mst)),
+                                     leaves[leaves %!in% ter_valid]))
+  }, mc.cores = n_cores)
+
+  # FIX 2: drop failed terminals before Reduce
+  mst.ll <- Filter(Negate(is.null), mst.ll)
+  if (length(mst.ll) == 0) stop("All terminals failed in set_cover_mst")
+
+  Ugraph   <- Reduce(`%u%`, mst.ll)
+  edge.ids <- get.edge.ids(graph = G,
+                            vp    = as.vector(t(ends(graph = Ugraph, es = E(Ugraph)))))
+  E(Ugraph)$weight <- E(G)[edge.ids]$weight
+  steiner.ig <- mst(graph = Ugraph, weights = E(Ugraph)$weight, algorithm = 'prim')
+  Uter       <- Reduce(union, terminals)
+
+  while (1) {
+    Udeg           <- degree(graph = steiner.ig, v = V(steiner.ig), mode = 'all')
+    leaves         <- names(Udeg)[Udeg == 1]
+    steiner.leaves <- leaves[leaves %!in% Uter]
+    if (length(steiner.leaves) < 1) break
+    steiner.ig <- delete_vertices(graph = steiner.ig, v = steiner.leaves)
   }
-  
+
   cat(length(E(steiner.ig)), 'edges are identified for the Steiner Forest Problem.\n')
-  
   return(steiner.ig)
 }
 
