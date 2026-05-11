@@ -1,9 +1,10 @@
 name,prc,rcl,f01
 o_celloracle.o_celloracle.o_celloracle.o_celloracle,1.0,1.0,1.0
 o_collectri.o_collectri.o_collectri.o_collectri,0.2727272727272727,1.0,0.2747053490480508
-o_deepmaps.o_deepmaps.o_deepmaps.o_deepmaps,0.3333333333333333,0.3333333333333333,0.3333333333333333
+o_deepmaps.o_deepmaps.o_deepmaps.o_deepmaps,0.0,0.0,0.0
 o_dictys.o_dictys.o_dictys.o_dictys,0.4285714285714285,1.0,0.4310099573257468
 o_dorothea.o_dorothea.o_dorothea.o_dorothea,0.3,1.0,0.3020937188434696
+o_figr.o_figr.o_figr.o_figr,0.6,1.0,0.6023856858846919
 o_granie.o_granie.o_granie.o_granie,0.6,1.0,0.6023856858846919
 o_linger.o_linger.o_linger.o_linger,0.6666666666666666,0.6666666666666666,0.6666666666666666
 o_linger_baseline.o_linger_baseline.o_linger_baseline.o_linger_baseline,0.0,0.0,0.0
